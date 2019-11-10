@@ -10,11 +10,11 @@ class tablero:
     #     self.table[i][j]="  "
     self.table[0][0]=Lancer(0,0,True)
     self.table[0][1]=horse(0,1,True)
-    self.table[0][2]=silverGral(0,2,True)
-    self.table[0][3]=goldenGral(0,3,True)
+    self.table[0][2]=silverGen(0,2,True)
+    self.table[0][3]=goldenGen(0,3,True)
     self.table[0][4]=King(0,4,True)
-    self.table[0][5]=silverGral(0,5,True)
-    self.table[0][6]=goldenGral(0,6,True)
+    self.table[0][5]=silverGen(0,5,True)
+    self.table[0][6]=goldenGen(0,6,True)
     self.table[0][7]=horse(0,7,True)
     self.table[0][8]=Lancer(0,8,True)
     self.table[1][1]=bishop(1,1,True)
@@ -24,11 +24,11 @@ class tablero:
 
     self.table[8][0]=Lancer(8,0,False)
     self.table[8][1]=horse(8,1,False)
-    self.table[8][2]=silverGral(8,2,False)
-    self.table[8][3]=goldenGral(8,3,False)
+    self.table[8][2]=silverGen(8,2,False)
+    self.table[8][3]=goldenGen(8,3,False)
     self.table[8][4]=King(8,4,False)
-    self.table[8][5]=silverGral(8,5,False)
-    self.table[8][6]=goldenGral(8,6,False)
+    self.table[8][5]=silverGen(8,5,False)
+    self.table[8][6]=goldenGen(8,6,False)
     self.table[8][7]=horse(8,7,False)
     self.table[8][8]=Lancer(8,8,False)
     self.table[7][1]=bishop(7,1,False)
@@ -80,7 +80,7 @@ class tablero:
   
   
   
-class goldenGral:
+class goldenGen:
   posi=0
   posj=0
   white=None
@@ -203,7 +203,7 @@ class pawn:
   
     
 
-class silverGral:
+class silverGen:
   posi=0
   posj=0
   white=None
