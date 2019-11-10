@@ -34,7 +34,7 @@ class goldenGral:
     print("movimiento no permitido")
     return False
 
-class peon:
+class pawn:
   posi=0
   posj=0
   
@@ -76,7 +76,7 @@ class horse:
     self.posi=posi
     self.posj=posj
   
-  def isPosible(self,x):
+  def isPosible(self,x,y):
     if(x==self.posi-2 and (y==self.posj-1 or y==self.posj+1 )):
       return True
     else:
