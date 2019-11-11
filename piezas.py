@@ -1,6 +1,6 @@
 
 class tablero:
-  table= [["  " for x in range(9)] for y in range(9)] 
+  table= [["   " for x in range(9)] for y in range(9)] 
   graveyardW = []
   graveyardB=[]
   
@@ -38,31 +38,34 @@ class tablero:
 
   def __str__(self):
     #print(self.table)
-    att="   0   1   2   3   4   5   6   7   8 \n"
-    att+="  +----------------------------------+\n"
+    att="    0   1   2   3   4   5   6   7   8 \n"
+    att+="  +-------------------------------------+\n"
     for i in range(9):
-      att+=str(i)+"|| "
+      att+=str(i)+"||"
       for j in range(9):
-        att+=str(self.table[i][j])+" | "
+        att+=str(self.table[i][j])+"|"
       att+="|\n"
-    att+="  +----------------------------------+\n"
+    att+="  +-------------------------------------+\n"
     return att
       
   def move(self,xOld,yOld,xNew,yNew):
     piece= self.table[xOld][yOld]
     if(piece.isPossible(xNew,yNew)):
+      print("yes")
       if(self.isPossible(xOld,yOld,xNew,yNew)):
         self.table[xNew][yNew]=piece
-        self.table[xOld][yOld]="  "
+        self.table[xOld][yOld]="   "
         piece.refreshMove(xNew,yNew)
+        self.checkAutoCrown(xNew,yNew)
   
 
   def isPossible(self,xOld,yOld,xNew,yNew):
     #TODO if theres is a piece
+    #print(xOld,yOld,xNew,yNew)
     if(xNew>8 or yNew >8):
       print("No se puede salir del tablero")
       return False
-    elif(self.table[xNew][yNew]=="  "):
+    elif(self.table[xNew][yNew]=="   "):
       return True
     elif(self.table[xNew][yNew].white==self.table[xOld][yOld].white):
       return False
@@ -75,6 +78,26 @@ class tablero:
     else:
       return False
 
+  def checkAutoCrown(self,x,y):
+    aux=self.table[x][y]
+    if(aux.isCorunable):
+      if(aux.white):
+        if(x==8):
+          aux.crown=True
+          return True
+        if(x>=6):
+          #ask?
+          print("Coronar?")
+          return False
+      else:
+        if(x==0):
+          aux.crown=True
+          return True
+        if(x<=2):
+          #ask?
+          print("Coronar?")
+          return False
+    return False
   
   
   
@@ -94,9 +117,9 @@ class goldenGen:
 
   def __str__(self):
     if(self.white):
-      return '\033[1m'+'Gv'+'\033[0m'
+      return '\033[1m'+' Gv'+'\033[0m'
     else:
-      return 'G^'
+      return ' G^'
   
   def refreshMove(self,xNew,yNew):
     self.posi=xNew
@@ -144,10 +167,16 @@ class pawn:
     self.white=white
   
   def __str__(self):
-    if(self.white):
-      return '\033[1m'+'pv'+'\033[0m'
+    if(self.crown):
+      if(self.white):
+        return '\033[1m'+'*pv'+'\033[0m'
+      else:
+        return '*p^'
     else:
-      return 'p^'
+      if(self.white):
+        return '\033[1m'+' pv'+'\033[0m'
+      else:
+        return ' p^'
   
   
   def refreshMove(self,xNew,yNew):
@@ -157,7 +186,7 @@ class pawn:
 
   def isPossible(self,x,y):
     if(self.crown):
-      self.crownedMove(x,y)
+      return self.crownedMove(x,y)
     else:
       if(y!=self.posj):
         print("movimiento no permitido")
@@ -216,10 +245,16 @@ class silverGen:
     self.white=white
   
   def __str__(self):
-    if(self.white):
-      return '\033[1m'+'Sv'+'\033[0m'
+    if(self.crown):
+      if(self.white):
+        return '\033[1m'+'*Sv'+'\033[0m'
+      else:
+        return '*S^'
     else:
-      return 'S^'
+      if(self.white):
+        return '\033[1m'+' Sv'+'\033[0m'
+      else:
+        return ' S^'
 
   
   def refreshMove(self,xNew,yNew):
@@ -229,7 +264,7 @@ class silverGen:
 
   def isPossible(self,x,y):
     if(self.crown):
-      self.crownedMove(x,y)
+      return self.crownedMove(x,y)
     else:
       if(self.white):
         if(x==self.posi+1):
@@ -290,10 +325,16 @@ class horse:
     self.white=white
   
   def __str__(self):
-    if(self.white):
-      return '\033[1m'+'Hv'+'\033[0m'
+    if(self.crown):
+      if(self.white):
+        return '\033[1m'+'*Hv'+'\033[0m'
+      else:
+        return '*H^'
     else:
-      return 'H^'
+      if(self.white):
+        return '\033[1m'+' Hv'+'\033[0m'
+      else:
+        return ' H^'
       
   
   def refreshMove(self,xNew,yNew):
@@ -303,7 +344,7 @@ class horse:
   
   def isPossible(self,x,y):
     if(self.crown):
-      self.crownedMove(x,y)
+      return self.crownedMove(x,y)
     else:
       if(self.white):
         if(x==self.posi+2 and (y==self.posj-1 or y==self.posj+1 )):
@@ -358,10 +399,16 @@ class bishop:
     self.white=white
   
   def __str__(self):
-    if(self.white):
-      return '\033[1m'+'Bv'+'\033[0m'
+    if(self.crown):
+      if(self.white):
+        return '\033[1m'+'*Bv'+'\033[0m'
+      else:
+        return '*B^'
     else:
-      return 'B^'
+      if(self.white):
+        return '\033[1m'+' Bv'+'\033[0m'
+      else:
+        return ' B^'
 
   
   def refreshMove(self,xNew,yNew):
@@ -372,7 +419,7 @@ class bishop:
   def isPossible(self,x,y):
     act=self.posi*9+self.posj
     if(self.crown):
-      self.crownedMove
+      return self.crownedMove
     if((x*9+y-act)%10==0 or (x*9+y+act)%8==0):
       return True
     else:
@@ -399,10 +446,16 @@ class Tower:
     self.white=white
   
   def __str__(self):
-    if(self.white):
-      return '\033[1m'+'Tv'+'\033[0m'
+    if(self.crown):
+      if(self.white):
+        return '\033[1m'+'*Tv'+'\033[0m'
+      else:
+        return '*T^'
     else:
-      return 'T^'
+      if(self.white):
+        return '\033[1m'+' Tv'+'\033[0m'
+      else:
+        return ' T^'
   
   def refreshMove(self,xNew,yNew):
     self.posi=xNew
@@ -412,7 +465,7 @@ class Tower:
   def isPossible(self,x,y):
     act=self.posi*9+self.posj
     if(self.crown):
-      self.crownedMove(x,y)
+      return self.crownedMove(x,y)
     
     if((x*9+y-act)%8==0 or y==self.posj):
       return True
@@ -439,10 +492,16 @@ class Lancer:
     self.white=white
   
   def __str__(self):
-    if(self.white):
-      return '\033[1m'+'Lv'+'\033[0m'
+    if(self.crown):
+      if(self.white):
+        return '\033[1m'+'*Lv'+'\033[0m'
+      else:
+        return '*L^'
     else:
-      return 'L^'
+      if(self.white):
+        return '\033[1m'+' Lv'+'\033[0m'
+      else:
+        return ' L^'
   
   def refreshMove(self,xNew,yNew):
     self.posi=xNew
@@ -450,47 +509,47 @@ class Lancer:
 
 
   def isPossible(self,x,y):
-    if(self.white):
-      if(y==self.posj and x>self.posi):
-        return True
-      else:
-        print("movimiento no permitido")
-        return False
-    else:
-      if(y==self.posj and x<self.posj):
-        return True
-      else:
-        print("movimiento no permitido")
-        return False
-  
-  def crownedMove(self,x,y):
     if(self.crown):
-      self.crownedMove(x,y)
+      return self.crownedMove(x,y)
     else:
       if(self.white):
-        if(x==self.posi+1):
-          if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
-            return True
-        elif(x==self.posi-1):
-          if(y==self.posj):
-            return True
-        elif(x==self.posi):
-          if(y==self.posj-1 or y==self.posj+1):
-            return True
-        print("movimiento no permitido")
-        return False
+        if(y==self.posj and x>self.posi):
+          return True
+        else:
+          print("movimiento no permitido")
+          return False
       else:
-        if(x==self.posi-1):
-          if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
-            return True
-        elif(x==self.posi+1):
-          if(y==self.posj):
-            return True
-        elif(x==self.posi):
-          if(y==self.posj-1 or y==self.posj+1):
-            return True
-        print("movimiento no permitido")
-        return False
+        if(y==self.posj and x<self.posj):
+          return True
+        else:
+          print("movimiento no permitido")
+          return False
+  
+  def crownedMove(self,x,y):
+    if(self.white):
+      if(x==self.posi+1):
+        if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
+          return True
+      elif(x==self.posi-1):
+        if(y==self.posj):
+          return True
+      elif(x==self.posi):
+        if(y==self.posj-1 or y==self.posj+1):
+          return True
+      print("movimiento no permitido")
+      return False
+    else:
+      if(x==self.posi-1):
+        if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
+          return True
+      elif(x==self.posi+1):
+        if(y==self.posj):
+          return True
+      elif(x==self.posi):
+        if(y==self.posj-1 or y==self.posj+1):
+          return True
+      print("movimiento no permitido")
+      return False
     
 class King:
   posi=0
@@ -506,9 +565,9 @@ class King:
 
   def __str__(self):
     if(self.white):
-      return '\033[1m'+'Kv'+'\033[0m'
+      return '\033[1m'+' Kv'+'\033[0m'
     else:
-      return 'K^'
+      return ' K^'
   
   def refreshMove(self,xNew,yNew):
     self.posi=xNew
