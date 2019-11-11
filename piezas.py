@@ -1,13 +1,12 @@
 
 class tablero:
   table= [["   " for x in range(9)] for y in range(9)] 
-  graveyardW = []
-  graveyardB=[]
+  graveyardW = [] #piezas capturadas por blancas
+  graveyardB=[] #piezas capturadas por negras
   
   def __init__(self):
-    # for i in range(9):
-    #   for j in range(9):
-    #     self.table[i][j]="  "
+    """crea tablero inicial con cada elemento en su posicion correspondiente"""
+    
     self.table[0][0]=Lancer(0,0,True)
     self.table[0][1]=horse(0,1,True)
     self.table[0][2]=silverGen(0,2,True)
@@ -37,6 +36,7 @@ class tablero:
       self.table[6][k]=pawn(6,k,False)
 
   def __str__(self):
+    """ imprime tablero """
     #print(self.table)
     att="    0   1   2   3   4   5   6   7   8 \n"
     att+="  +-------------------------------------+\n"
@@ -49,6 +49,8 @@ class tablero:
     return att
       
   def move(self,xOld,yOld,xNew,yNew):
+    """mueve una pieza desde origen hasta final
+    si el movimiento no es posible, o no se puede ocupar devuelve falso"""
     piece= self.table[xOld][yOld]
     if(piece.isPossible(xNew,yNew)):
       print("yes")
@@ -57,20 +59,28 @@ class tablero:
         self.table[xOld][yOld]="   "
         piece.refreshMove(xNew,yNew)
         self.checkAutoCrown(xNew,yNew)
+        return True
+    return False
   
 
   def isPossible(self,xOld,yOld,xNew,yNew):
+    """ revisa si es posible efectuar dicho movimiento en el tablero si lo esm devuelve true"""
     #TODO if theres is a piece
     #print(xOld,yOld,xNew,yNew)
     if(xNew>8 or yNew >8):
+      #index out of range
       print("No se puede salir del tablero")
       return False
     elif(self.table[xNew][yNew]=="   "):
+      #el destino es una casilla vacia
       return True
     elif(self.table[xNew][yNew].white==self.table[xOld][yOld].white):
+      #el destino esta ocupado por casilla mismo color
       return False
     elif(self.table[xNew][yNew].white!=self.table[xOld][yOld].white):
+      #son distinto color
       if(self.table[xOld][yOld].white==True):
+        #dependiendo del color de la ficha coloca la ficha comida en un cementerio u otro
         self.graveyardW.append(self.table[xNew][yNew])
       else:
         self.graveyardB.append(self.table[xNew][yNew])
@@ -79,10 +89,13 @@ class tablero:
       return False
 
   def checkAutoCrown(self,x,y):
+    """revisa si la ficha no puede hacer mas movimientos y necesita ser autocoronada"""
     aux=self.table[x][y]
     if(aux.isCorunable):
+      #la ficha es coronable
       if(aux.white):
         if(x==8):
+          #posicion limite para blancas y autocoronamos
           aux.crown=True
           return True
         if(x>=6):
@@ -91,6 +104,7 @@ class tablero:
           return False
       else:
         if(x==0):
+          #posicion limite para negras y autocoronamos
           aux.crown=True
           return True
         if(x<=2):
@@ -122,10 +136,12 @@ class goldenGen:
       return ' G^'
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     if(self.white):
       if(x==self.posi+1):
         if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
@@ -180,11 +196,12 @@ class pawn:
   
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     if(self.crown):
       return self.crownedMove(x,y)
     else:
@@ -205,6 +222,7 @@ class pawn:
           return False
   
   def crownedMove(self,x,y):
+    """movimientos posibles una vez coronado"""
     if(self.white):
       if(x==self.posi+1):
         if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
@@ -258,11 +276,12 @@ class silverGen:
 
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     if(self.crown):
       return self.crownedMove(x,y)
     else:
@@ -286,6 +305,7 @@ class silverGen:
         return False
 
   def crownedMove(self,x,y):
+    """movimientos posibles una vez coronado"""
     if(self.white):
       if(x==self.posi+1):
         if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
@@ -338,11 +358,12 @@ class horse:
       
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-  
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     if(self.crown):
       return self.crownedMove(x,y)
     else:
@@ -360,6 +381,7 @@ class horse:
           return False
   
   def crownedMove(self,x,y):
+    """movimientos posibles una vez coronado"""
     if(self.white):
       if(x==self.posi+1):
         if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
@@ -412,11 +434,12 @@ class bishop:
 
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     act=self.posi*9+self.posj
     if(self.crown):
       return self.crownedMove
@@ -458,11 +481,12 @@ class Tower:
         return ' T^'
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     act=self.posi*9+self.posj
     if(self.crown):
       return self.crownedMove(x,y)
@@ -504,11 +528,12 @@ class Lancer:
         return ' L^'
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-
   def isPossible(self,x,y):
+    """ revisa si es posible efectuar el movimiento"""
     if(self.crown):
       return self.crownedMove(x,y)
     else:
@@ -526,6 +551,7 @@ class Lancer:
           return False
   
   def crownedMove(self,x,y):
+    """movimientos posibles una vez coronado"""
     if(self.white):
       if(x==self.posi+1):
         if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
@@ -570,12 +596,12 @@ class King:
       return ' K^'
   
   def refreshMove(self,xNew,yNew):
+    """actualiza la posicion de la pieza"""
     self.posi=xNew
     self.posj=yNew
 
-
   def isPossible(self,x,y):
-    
+    """ revisa si es posible efectuar el movimiento"""
     if(x==self.posi-1):
       if(y==self.posj-1 or y==self.posj+1 or y==self.posj):
         return True
