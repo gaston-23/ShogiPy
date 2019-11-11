@@ -2,9 +2,12 @@
 
 #Strings to translation
 movementFailed="movement not allowed"
-failSelection="You have not selected a correct piece check the coordinates you entered"
+failSelection="You have not selected a correct piece check the coordinates you've entered"
 wrongColorSelected="You can only move your chips"
 indexOutofRange="Your coordinates are out of the table check it and enter them again"
+crowningAsk="Do you want to crown the piece? Y / N : "
+pieceCrowned="The piece has been crowned"
+pieceNotCrowned="The piece hasn't been crowned"
 
 class tablero:
   table= [["   " for x in range(9)] for y in range(9)] 
@@ -117,26 +120,40 @@ class tablero:
   def checkAutoCrown(self,x,y):
     """revisa si la ficha no puede hacer mas movimientos y necesita ser autocoronada"""
     aux=self.table[x][y]
-    if(aux.isCorunable):
+    if(aux.isCorunable and not aux.crown):
       #la ficha es coronable
       if(aux.white):
         if(x==8):
           #posicion limite para blancas y autocoronamos
           aux.crown=True
+          print(pieceCrowned)
           return True
         if(x>=6):
           #ask?
-          print("Coronar?")
-          return False
+          a=input(crowningAsk)
+          if(a=="Y" or a=="y"):
+            aux.crown=True
+            print(pieceCrowned)
+            return True
+          else:
+            print(pieceNotCrowned)
+            return False
       else:
         if(x==0):
           #posicion limite para negras y autocoronamos
           aux.crown=True
+          print(pieceCrowned)
           return True
         if(x<=2):
           #ask?
-          print("Coronar?")
-          return False
+          a=input(crowningAsk)
+          if(a=="Y" or a=="y"):
+            aux.crown=True
+            print(pieceCrowned)
+            return True
+          else:
+            print(pieceNotCrowned)
+            return False
     return False
   
   def printGraveyard(self,white):
@@ -160,7 +177,7 @@ class goldenGen:
   posi=0
   posj=0
   white=None
-  crown=False
+  crown=True
   isCorunable=False
   
   def __init__(self, posi,posj,white):
@@ -513,23 +530,23 @@ class bishop:
     """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
     if (self.posi<x):
       if(self.posj<y):
-        for i in range (1,abs(x-self.posi)-1):
+        for i in range (1,abs(x-self.posi)):
           if(not table.isFree(self.posi+i,self.posj+i)):
             print(movementFailed)
             return True
       else:
-        for i in range (1,abs(x-self.posi)-1):
+        for i in range (1,abs(x-self.posi)):
           if(not table.isFree(self.posi-i,self.posj-i)):
             print(movementFailed)
             return True
     else:
       if(self.posj<y):
-        for i in range (1,abs(x-self.posi)-1):
+        for i in range (1,abs(x-self.posi)):
           if(not table.isFree(self.posi+i,self.posj+i)):
             print(movementFailed)
             return True
       else:
-        for i in range (1,abs(x-self.posi)-1):
+        for i in range (1,abs(x-self.posi)):
           if(not table.isFree(self.posi-i,self.posj-i)):
             print(movementFailed)
             return True
@@ -700,7 +717,7 @@ class King:
   posi=0
   posj=0
   white=None
-  crown=False
+  crown=True
   isCorunable=False
   
   def __init__(self, posi,posj,white):

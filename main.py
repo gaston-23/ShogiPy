@@ -7,7 +7,8 @@ def recMov():
     s=input()
     s=s.split(" ")
     if(len(s)==2):
-      flag=False
+      if(type(s[0])==str and type(s[1])==str and s[0]!="" and s[1]!=""):
+        flag=False
   return s
 
 
