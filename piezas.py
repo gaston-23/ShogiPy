@@ -39,33 +39,46 @@ class tablero:
     """ imprime tablero """
     #print(self.table)
     att="    0   1   2   3   4   5   6   7   8 \n"
-    att+="  +-------------------------------------+\n"
+    att+="  +-----------------------------------+\n"
     for i in range(9):
       att+=str(i)+"||"
       for j in range(9):
         att+=str(self.table[i][j])+"|"
       att+="|\n"
-    att+="  +-------------------------------------+\n"
+    att+="  +-----------------------------------+\n"
     return att
       
-  def move(self,xOld,yOld,xNew,yNew):
+  def move(self,xOld,yOld,xNew,yNew,player):
     """mueve una pieza desde origen hasta final
     si el movimiento no es posible, o no se puede ocupar devuelve falso"""
+    
     piece= self.table[xOld][yOld]
+    if(piece=="   "):
+      print("No ha seleccionado una pieza correctamente controle las coordenadas que ingreso")
+      return False
+    if((player=="Black" and piece.white) or (player=="White" and not (piece.white))):
+      print("Solo puedes mover tus fichas")
+      return False
     if(piece.isPossible(xNew,yNew)):
-      print("yes")
+      #print("yes")
       if(self.isPossible(xOld,yOld,xNew,yNew)):
-        self.table[xNew][yNew]=piece
-        self.table[xOld][yOld]="   "
-        piece.refreshMove(xNew,yNew)
-        self.checkAutoCrown(xNew,yNew)
-        return True
+        if(not piece.hasObstacles(self,xNew,yNew)):
+          self.table[xNew][yNew]=piece
+          self.table[xOld][yOld]="   "
+          piece.refreshMove(xNew,yNew)
+          self.checkAutoCrown(xNew,yNew)
+          return True
+        
     return False
   
+  def isFree(self,x,y):
+    if(self.table[x][y]=="   "):
+      return True
+    else:
+      return False
 
   def isPossible(self,xOld,yOld,xNew,yNew):
     """ revisa si es posible efectuar dicho movimiento en el tablero si lo esm devuelve true"""
-    #TODO if theres is a piece
     #print(xOld,yOld,xNew,yNew)
     if(xNew>8 or yNew >8):
       #index out of range
@@ -76,14 +89,20 @@ class tablero:
       return True
     elif(self.table[xNew][yNew].white==self.table[xOld][yOld].white):
       #el destino esta ocupado por casilla mismo color
+      print("Movimiento no permitido")
       return False
     elif(self.table[xNew][yNew].white!=self.table[xOld][yOld].white):
       #son distinto color
       if(self.table[xOld][yOld].white==True):
         #dependiendo del color de la ficha coloca la ficha comida en un cementerio u otro
-        self.graveyardW.append(self.table[xNew][yNew])
+        aux=self.table[xNew][yNew]
+        aux.white=True
+        self.graveyardW.append(aux)
       else:
-        self.graveyardB.append(self.table[xNew][yNew])
+        aux=self.table[xNew][yNew]
+        aux.white=False
+        self.graveyardB.append(aux)
+        
       return True
     else:
       return False
@@ -113,6 +132,19 @@ class tablero:
           return False
     return False
   
+  def printGraveyard(self,white):
+    att=""
+    att+="\t"
+    if(white):
+      for i in self.graveyardW:
+        
+        att+=str(i)
+        att+="|| "
+    else:
+      for i in self.graveyardB:
+        att+=str(i)
+        att+="|| "
+    return att
   
   
   
@@ -167,7 +199,10 @@ class goldenGen:
       print("movimiento no permitido")
       return False
   
-  
+  def hasObstacles(self,table,x,y):
+    """solo mueve una posicion"""
+    
+    return False
     
 
 class pawn:
@@ -247,7 +282,11 @@ class pawn:
           return True
       print("movimiento no permitido")
       return False
-  
+
+  def hasObstacles(self,table,x,y):
+    """solo mueve una posicion"""
+    
+    return False
     
 
 class silverGen:
@@ -330,7 +369,12 @@ class silverGen:
           return True
       print("movimiento no permitido")
       return False
+
+  def hasObstacles(self,table,x,y):
+    """solo mueve una posicion"""
     
+    return False
+
 
 class horse:
   posi=0
@@ -406,6 +450,9 @@ class horse:
           return True
       print("movimiento no permitido")
       return False
+  def hasObstacles(self,table,x,y):
+    """devuelve False porque siempre salta de posicion"""
+    return False
     
 
 class bishop:
@@ -454,7 +501,33 @@ class bishop:
       return True
     elif ((y==self.posj-1 or y==self.posj+1) and x==self.posi):
       return True
-        
+  
+  def hasObstacles(self,table,x,y):
+    """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
+    if (self.posi<x):
+      if(self.posj<y):
+        for i in range (1,abs(x-self.posi)-1):
+          if(not table.isFree(self.posi+i,self.posj+i)):
+            print("movimiento no permitido")
+            return True
+      else:
+        for i in range (1,abs(x-self.posi)-1):
+          if(not table.isFree(self.posi-i,self.posj-i)):
+            print("movimiento no permitido")
+            return True
+    else:
+      if(self.posj<y):
+        for i in range (1,abs(x-self.posi)-1):
+          if(not table.isFree(self.posi+i,self.posj+i)):
+            print("movimiento no permitido")
+            return True
+      else:
+        for i in range (1,abs(x-self.posi)-1):
+          if(not table.isFree(self.posi-i,self.posj-i)):
+            print("movimiento no permitido")
+            return True
+    return False
+
   
 class Tower:
   posi=0
@@ -488,6 +561,7 @@ class Tower:
   def isPossible(self,x,y):
     """ revisa si es posible efectuar el movimiento"""
     act=self.posi*9+self.posj
+
     if(self.crown):
       return self.crownedMove(x,y)
     
@@ -500,7 +574,30 @@ class Tower:
   def crownedMove(self,x,y):
     if((x==self.posi-1 or x==self.posi+1) and (y==self.posj+1 or y==self.posj-1)):
       return True
-
+  
+  def hasObstacles(self,table,x,y):
+    """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
+    if (self.posi<x):
+      for i in range (1,abs(x-self.posi)-1):
+        if(not table.isFree(self.posi+i,self.posj)):
+          print("movimiento no permitido")
+          return True
+    elif (self.posi>x):
+      for i in range (1,abs(x-self.posi)-1):
+        if(not table.isFree(self.posi-i,self.posj)):
+          print("movimiento no permitido")
+          return True
+    elif (self.posj<y):
+      for i in range (1,abs(y-self.posj)-1):
+        if(not table.isFree(self.posj+i,self.posj)):
+          print("movimiento no permitido")
+          return True
+    elif (self.posj>y):
+      for i in range (1,abs(x-self.posi)-1):
+        if(not table.isFree(self.posj-i,self.posj)):
+          print("movimiento no permitido")
+          return True
+    return False
 
 
 class Lancer:
@@ -544,7 +641,7 @@ class Lancer:
           print("movimiento no permitido")
           return False
       else:
-        if(y==self.posj and x<self.posj):
+        if(y==self.posj and x<self.posi):
           return True
         else:
           print("movimiento no permitido")
@@ -576,6 +673,21 @@ class Lancer:
           return True
       print("movimiento no permitido")
       return False
+  
+  def hasObstacles(self,table,x,y):
+    """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
+    if(self.posi<x):
+      for i in range (1,abs(x-self.posi)-1):
+        if(not table.isFree(self.posi+i,self.posj)):
+          print("movimiento no permitido")
+          return True
+    else:
+      for i in range (1,abs(x-self.posi)-1):
+        if(not table.isFree(self.posi-i,self.posj)):
+          print("movimiento no permitido")
+          return True
+    return False
+    
     
 class King:
   posi=0
@@ -614,3 +726,5 @@ class King:
     print("movimiento no permitido")
     return False
 
+  def hasObstacles(self,table,x,y):
+    return False
