@@ -8,4 +8,4 @@ has a class for handle the table
     has a matrix which contains the pieces
     has a "graveyard" which contains the captured pieces
 
-the players aren't an object like pieces, they are just a string
+Note:the players aren't an object like the pieces, they are just a string
