@@ -12,7 +12,10 @@ Note:the players aren't an object like the pieces, they are just a string
 
 pending changes:
   +fix the bug with the bishop
-  +finish obstacle's test
   +control when someone wins
-  +incorporate dead pieces to the table
+  \\incorporate dead pieces to the table (added)
   
+pending test:
+  -bishop moves
+  -obstacles
+  -invoking

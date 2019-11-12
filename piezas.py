@@ -107,10 +107,12 @@ class tablero:
         #dependiendo del color de la ficha coloca la ficha comida en un cementerio u otro
         aux=self.table[xNew][yNew]
         aux.white=True
+        aux.crown=False
         self.graveyardW.append(aux)
       else:
         aux=self.table[xNew][yNew]
         aux.white=False
+        aux.crown=False
         self.graveyardB.append(aux)
         
       return True
@@ -170,6 +172,15 @@ class tablero:
         att+="|| "
     return att
   
+  def insert(self,piece,x,y,player):
+    self.table[x][y]=piece
+    print(piece)
+    if(player=="White"):
+      self.graveyardW.remove(piece)
+    else:
+      self.graveyardB.remove(piece)
+    return True
+    
   
   
   
@@ -187,7 +198,7 @@ class goldenGen:
 
   def __str__(self):
     if(self.white):
-      return '\033[1m'+' Gv'+'\033[0m'
+      return ' Gv'
     else:
       return ' G^'
   
@@ -244,12 +255,12 @@ class pawn:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*pv'+'\033[0m'
+        return '*pv'
       else:
         return '*p^'
     else:
       if(self.white):
-        return '\033[1m'+' pv'+'\033[0m'
+        return ' pv'
       else:
         return ' p^'
   
@@ -328,12 +339,12 @@ class silverGen:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Sv'+'\033[0m'
+        return '*Sv'
       else:
         return '*S^'
     else:
       if(self.white):
-        return '\033[1m'+' Sv'+'\033[0m'
+        return ' Sv'
       else:
         return ' S^'
 
@@ -415,12 +426,12 @@ class horse:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Hv'+'\033[0m'
+        return '*Hv'
       else:
         return '*H^'
     else:
       if(self.white):
-        return '\033[1m'+' Hv'+'\033[0m'
+        return ' Hv'
       else:
         return ' H^'
       
@@ -494,12 +505,12 @@ class bishop:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Bv'+'\033[0m'
+        return '*Bv'
       else:
         return '*B^'
     else:
       if(self.white):
-        return '\033[1m'+' Bv'+'\033[0m'
+        return ' Bv'
       else:
         return ' B^'
 
@@ -568,12 +579,12 @@ class Tower:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Tv'+'\033[0m'
+        return '*Tv'
       else:
         return '*T^'
     else:
       if(self.white):
-        return '\033[1m'+' Tv'+'\033[0m'
+        return ' Tv'
       else:
         return ' T^'
   
@@ -639,12 +650,12 @@ class Lancer:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Lv'+'\033[0m'
+        return '*Lv'
       else:
         return '*L^'
     else:
       if(self.white):
-        return '\033[1m'+' Lv'+'\033[0m'
+        return ' Lv'
       else:
         return ' L^'
   
@@ -727,7 +738,7 @@ class King:
 
   def __str__(self):
     if(self.white):
-      return '\033[1m'+' Kv'+'\033[0m'
+      return ' Kv'
     else:
       return ' K^'
   
