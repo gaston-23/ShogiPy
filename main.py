@@ -24,7 +24,6 @@ def recMov(table,first,player):
 
 def selectPiece(table,player):
   if(player=="White"):
-    #get off the crown into the graveyard
     grave=table.graveyardW
   else:
     grave=table.graveyardB
@@ -72,7 +71,6 @@ def invoke(table,player):
 
 def main():
   q= Tablero()
-  x=0
   player="White"
   i=0
   active=True

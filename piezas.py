@@ -93,6 +93,7 @@ class Tablero:
     if(self.table[xNew][yNew]!="   "):
       aux=self.table[xNew][yNew]
       aux.crown=False
+      aux.canBeCorunated=False
       if(self.table[xOld][yOld].white==True):
         #dependiendo del color de la ficha coloca la ficha comida en un cementerio u otro
         aux.white=True
@@ -144,7 +145,7 @@ class Tablero:
             print(pieceNotCrowned)
             return False
       else:
-        if(x==0):
+        if(x==0 and aux.autoCorunable):
           #posicion limite para negras y autocoronamos
           aux.crown=True
           print(pieceCrowned)
@@ -181,8 +182,12 @@ class Tablero:
     print(piece)
     if(player=="White"):
       self.graveyardW.remove(piece)
+      piece.refreshMove(x,y)
+      self.checkAutoCrown(x,y)
     else:
       self.graveyardB.remove(piece)
+      piece.refreshMove(x,y)
+      self.checkAutoCrown(x,y)
     return True
     
   
@@ -536,10 +541,10 @@ class Bishop:
 
   def isPossible(self,x,y):
     """ revisa si es posible efectuar el movimiento"""
-    act=self.posi*9+self.posj
+    act=(self.posi+1)*9+self.posj
     if(self.crown):
       return self.crownedMove
-    if((x*9+y-act)%10==0 or (x*9+y+act)%8==0):
+    if(((x+1)*9+y)%10==act%10 or ((x+1)*9+y)%8==act%8):
       return True
     else:
       print(movementFailed)
@@ -611,7 +616,6 @@ class Tower:
 
   def isPossible(self,x,y):
     """ revisa si es posible efectuar el movimiento"""
-    
     if(self.crown):
       return self.crownedMove(x,y)
     
@@ -620,9 +624,12 @@ class Tower:
     else:
       print(movementFailed)
       return False
+    
   
   def crownedMove(self,x,y):
     if((x==self.posi-1 or x==self.posi+1) and (y==self.posj+1 or y==self.posj-1)):
+      return True
+    if((x)%8==self.posi%8 or y==self.posj):
       return True
   
   def hasObstacles(self,table,x,y):
@@ -639,12 +646,12 @@ class Tower:
           return True
     elif (self.posj<y):
       for i in range (1,abs(y-self.posj)-1):
-        if(not table.isFree(self.posj+i,self.posj)):
+        if(not table.isFree(self.posi,self.posj+i)):
           print(movementFailed)
           return True
     elif (self.posj>y):
       for i in range (1,abs(x-self.posi)-1):
-        if(not table.isFree(self.posj-i,self.posj)):
+        if(not table.isFree(self.posi,self.posj-i)):
           print(movementFailed)
           return True
     return False
