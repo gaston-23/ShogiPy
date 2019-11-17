@@ -1,5 +1,15 @@
 
-class tablero:
+
+#Strings to translation
+movementFailed="movement not allowed"
+failSelection="You have not selected a correct piece check the coordinates you've entered"
+wrongColorSelected="You can only move your chips"
+indexOutofRange="Your coordinates are out of the table check it and enter them again"
+crowningAsk="Do you want to crown the piece? Y / N : "
+pieceCrowned="The piece has been crowned"
+pieceNotCrowned="The piece hasn't been crowned"
+
+class Tablero:
   table= [["   " for x in range(9)] for y in range(9)] 
   graveyardW = [] #piezas capturadas por blancas
   graveyardB=[] #piezas capturadas por negras
@@ -8,82 +18,106 @@ class tablero:
     """crea tablero inicial con cada elemento en su posicion correspondiente"""
     
     self.table[0][0]=Lancer(0,0,True)
-    self.table[0][1]=horse(0,1,True)
-    self.table[0][2]=silverGen(0,2,True)
-    self.table[0][3]=goldenGen(0,3,True)
+    self.table[0][1]=Horse(0,1,True)
+    self.table[0][2]=SilverGen(0,2,True)
+    self.table[0][3]=GoldenGen(0,3,True)
     self.table[0][4]=King(0,4,True)
-    self.table[0][5]=silverGen(0,5,True)
-    self.table[0][6]=goldenGen(0,6,True)
-    self.table[0][7]=horse(0,7,True)
+    self.table[0][5]=SilverGen(0,5,True)
+    self.table[0][6]=GoldenGen(0,6,True)
+    self.table[0][7]=Horse(0,7,True)
     self.table[0][8]=Lancer(0,8,True)
-    self.table[1][1]=bishop(1,1,True)
+    self.table[1][1]=Bishop(1,1,True)
     self.table[1][7]=Tower(1,7,True)
     for k in range(9):
-      self.table[2][k]=pawn(2,k,True)
+      self.table[2][k]=Pawn(2,k,True)
 
     self.table[8][0]=Lancer(8,0,False)
-    self.table[8][1]=horse(8,1,False)
-    self.table[8][2]=silverGen(8,2,False)
-    self.table[8][3]=goldenGen(8,3,False)
+    self.table[8][1]=Horse(8,1,False)
+    self.table[8][2]=SilverGen(8,2,False)
+    self.table[8][3]=GoldenGen(8,3,False)
     self.table[8][4]=King(8,4,False)
-    self.table[8][5]=silverGen(8,5,False)
-    self.table[8][6]=goldenGen(8,6,False)
-    self.table[8][7]=horse(8,7,False)
+    self.table[8][5]=SilverGen(8,5,False)
+    self.table[8][6]=GoldenGen(8,6,False)
+    self.table[8][7]=Horse(8,7,False)
     self.table[8][8]=Lancer(8,8,False)
-    self.table[7][1]=bishop(7,1,False)
+    self.table[7][1]=Bishop(7,1,False)
     self.table[7][7]=Tower(7,7,False)
     for k in range(9):
-      self.table[6][k]=pawn(6,k,False)
+      self.table[6][k]=Pawn(6,k,False)
 
   def __str__(self):
     """ imprime tablero """
     #print(self.table)
     att="    0   1   2   3   4   5   6   7   8 \n"
-    att+="  +-------------------------------------+\n"
+    att+="  +-----------------------------------+\n"
     for i in range(9):
       att+=str(i)+"||"
       for j in range(9):
         att+=str(self.table[i][j])+"|"
       att+="|\n"
-    att+="  +-------------------------------------+\n"
+    att+="  +-----------------------------------+\n"
     return att
       
-  def move(self,xOld,yOld,xNew,yNew):
+  def move(self,xOld,yOld,xNew,yNew,player):
     """mueve una pieza desde origen hasta final
     si el movimiento no es posible, o no se puede ocupar devuelve falso"""
+    if(xOld>8 or xNew>8 or yNew<0 or yOld<0):
+      print(indexOutofRange)
+      return False
     piece= self.table[xOld][yOld]
-    if(piece.isPossible(xNew,yNew)):
-      print("yes")
+    if(piece=="   "):
+      print(failSelection)
+      return False
+    elif((player=="Black" and piece.white) or (player=="White" and not (piece.white))):
+      print(wrongColorSelected)
+      return False
+    elif(piece.isPossible(xNew,yNew)):
+      #print("yes")
       if(self.isPossible(xOld,yOld,xNew,yNew)):
-        self.table[xNew][yNew]=piece
-        self.table[xOld][yOld]="   "
-        piece.refreshMove(xNew,yNew)
-        self.checkAutoCrown(xNew,yNew)
-        return True
+        if(not piece.hasObstacles(self,xNew,yNew)):
+          self.send2Graveyard(xOld,yOld,xNew,yNew)
+          self.table[xNew][yNew]=piece
+          self.table[xOld][yOld]="   "
+          piece.refreshMove(xNew,yNew)
+          self.checkAutoCrown(xNew,yNew)
+          return True
     return False
   
+  def isFree(self,x,y):
+    if(self.table[x][y]=="   "):
+      return True
+    else:
+      return False
+
+  def send2Graveyard(self,xOld,yOld,xNew,yNew):
+    if(self.table[xNew][yNew]!="   "):
+      aux=self.table[xNew][yNew]
+      aux.crown=False
+      aux.canBeCorunated=False
+      if(self.table[xOld][yOld].white==True):
+        #dependiendo del color de la ficha coloca la ficha comida en un cementerio u otro
+        aux.white=True
+        self.graveyardW.append(aux)
+      else:
+        aux.white=False
+        self.graveyardB.append(aux)
 
   def isPossible(self,xOld,yOld,xNew,yNew):
-    """ revisa si es posible efectuar dicho movimiento en el tablero si lo esm devuelve true"""
-    #TODO if theres is a piece
+    """ revisa si es posible efectuar dicho movimiento en el tablero, si lo es, devuelve true"""
     #print(xOld,yOld,xNew,yNew)
-    if(xNew>8 or yNew >8):
+    if(xNew>8 or yNew >8 or xNew<0 or yNew <0):
       #index out of range
-      print("No se puede salir del tablero")
+      print(indexOutofRange)
       return False
     elif(self.table[xNew][yNew]=="   "):
       #el destino es una casilla vacia
       return True
     elif(self.table[xNew][yNew].white==self.table[xOld][yOld].white):
       #el destino esta ocupado por casilla mismo color
+      print(movementFailed)
       return False
     elif(self.table[xNew][yNew].white!=self.table[xOld][yOld].white):
       #son distinto color
-      if(self.table[xOld][yOld].white==True):
-        #dependiendo del color de la ficha coloca la ficha comida en un cementerio u otro
-        self.graveyardW.append(self.table[xNew][yNew])
-      else:
-        self.graveyardB.append(self.table[xNew][yNew])
       return True
     else:
       return False
@@ -91,38 +125,101 @@ class tablero:
   def checkAutoCrown(self,x,y):
     """revisa si la ficha no puede hacer mas movimientos y necesita ser autocoronada"""
     aux=self.table[x][y]
-    if(aux.isCorunable):
-      #la ficha es coronable
+    if(aux.isCorunable and not aux.crown):
+      #la ficha es coronable y no ha sido coronada
       if(aux.white):
-        if(x==8):
-          #posicion limite para blancas y autocoronamos
+        if(x==8 and aux.autoCorunable):
+          #posicion limite para blancas y autocoronamos si la ficha es autocoronable
           aux.crown=True
+          print(pieceCrowned)
           return True
-        if(x>=6):
+        if(x>=6 or aux.canBeCorunated):
           #ask?
-          print("Coronar?")
-          return False
+          aux.canBeCorunated=True
+          a=input(crowningAsk)
+          if(a=="Y" or a=="y"):
+            aux.crown=True
+            print(pieceCrowned)
+            return True
+          else:
+            print(pieceNotCrowned)
+            return False
       else:
-        if(x==0):
+        if(x==0 and aux.autoCorunable):
           #posicion limite para negras y autocoronamos
           aux.crown=True
+          print(pieceCrowned)
           return True
-        if(x<=2):
+        if(x<=2 or aux.canBeCorunated):
           #ask?
-          print("Coronar?")
-          return False
+          aux.canBeCorunated=True
+          a=input(crowningAsk)
+          if(a=="Y" or a=="y"):
+            aux.crown=True
+            print(pieceCrowned)
+            return True
+          else:
+            print(pieceNotCrowned)
+            return False
     return False
   
+  def printGraveyard(self,white):
+    att=""
+    att+="\t"
+    if(white):
+      for i in self.graveyardW:
+        
+        att+=str(i)
+        att+="|| "
+    else:
+      for i in self.graveyardB:
+        att+=str(i)
+        att+="|| "
+    return att
+  
+  def insert(self,piece,x,y,player):
+    if(isinstance(piece, Pawn)):
+      print(True)
+      if(not self.controlPawns(piece,x,y,player)):
+        print("invocation error")
+        return False
+    else:
+      self.table[x][y]=piece
+      print(piece)
+      if(player=="White"):
+        self.graveyardW.remove(piece)
+        piece.refreshMove(x,y)
+        self.checkAutoCrown(x,y)
+      else:
+        self.graveyardB.remove(piece)
+        piece.refreshMove(x,y)
+        self.checkAutoCrown(x,y)
+      return True
+    
+  def controlPawns(self,piece,x,y,player):
+    if(player=="White"):
+      for i in range (9):
+        if(self.table[x][i]==" pv" or self.table[x][i]=="*pv"):
+          return False
+      return True
+    else:
+      for i in range (9):
+        if(self.table[x][i]==" p^" or self.table[x][i]=="*p^"):
+          return False
+      return True
   
   
+
   
   
-class goldenGen:
+class GoldenGen:
   posi=0
   posj=0
   white=None
-  crown=False
+  crown=True
   isCorunable=False
+  autoCorunable=False
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -131,7 +228,7 @@ class goldenGen:
 
   def __str__(self):
     if(self.white):
-      return '\033[1m'+' Gv'+'\033[0m'
+      return ' Gv'
     else:
       return ' G^'
   
@@ -152,7 +249,7 @@ class goldenGen:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
     else:
       if(x==self.posi-1):
@@ -164,18 +261,23 @@ class goldenGen:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
   
-  
+  def hasObstacles(self,table,x,y):
+    """solo mueve una posicion"""
+    
+    return False
     
 
-class pawn:
+class Pawn:
   posi=0
   posj=0
   white=None
   crown=False
   isCorunable=True
+  autoCorunable=True
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -185,12 +287,12 @@ class pawn:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*pv'+'\033[0m'
+        return '*pv'
       else:
         return '*p^'
     else:
       if(self.white):
-        return '\033[1m'+' pv'+'\033[0m'
+        return ' pv'
       else:
         return ' p^'
   
@@ -206,19 +308,19 @@ class pawn:
       return self.crownedMove(x,y)
     else:
       if(y!=self.posj):
-        print("movimiento no permitido")
+        print(movementFailed)
         return False
       if(self.white):
         if(x==self.posi+1):
           return True
         else:
-          print("movimiento no permitido")
+          print(movementFailed)
           return False
       else:
         if(x==self.posi-1):
           return True
         else:
-          print("movimiento no permitido")
+          print(movementFailed)
           return False
   
   def crownedMove(self,x,y):
@@ -233,7 +335,7 @@ class pawn:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
     else:
       if(x==self.posi-1):
@@ -245,17 +347,23 @@ class pawn:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
-  
+
+  def hasObstacles(self,table,x,y):
+    """solo mueve una posicion"""
+    
+    return False
     
 
-class silverGen:
+class SilverGen:
   posi=0
   posj=0
   white=None
   crown=False
   isCorunable=True
+  autoCorunable=True
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -265,12 +373,12 @@ class silverGen:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Sv'+'\033[0m'
+        return '*Sv'
       else:
         return '*S^'
     else:
       if(self.white):
-        return '\033[1m'+' Sv'+'\033[0m'
+        return ' Sv'
       else:
         return ' S^'
 
@@ -292,7 +400,7 @@ class silverGen:
         elif(x==self.posi-1):
           if(y==self.posj-1 or y==self.posj+1):
             return True
-        print("movimiento no permitido")
+        print(movementFailed)
         return False
       else:
         if(x==self.posi-1):
@@ -301,7 +409,7 @@ class silverGen:
         elif(x==self.posi+1):
           if(y==self.posj-1 or y==self.posj+1):
             return True
-        print("movimiento no permitido")
+        print(movementFailed)
         return False
 
   def crownedMove(self,x,y):
@@ -316,7 +424,7 @@ class silverGen:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
     else:
       if(x==self.posi-1):
@@ -328,16 +436,23 @@ class silverGen:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
-    
 
-class horse:
+  def hasObstacles(self,table,x,y):
+    """solo mueve una posicion"""
+    
+    return False
+
+
+class Horse:
   posi=0
   posj=0
   white=None
   crown=False
   isCorunable=True
+  autoCorunable=True
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -347,12 +462,12 @@ class horse:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Hv'+'\033[0m'
+        return '*Hv'
       else:
         return '*H^'
     else:
       if(self.white):
-        return '\033[1m'+' Hv'+'\033[0m'
+        return ' Hv'
       else:
         return ' H^'
       
@@ -371,13 +486,13 @@ class horse:
         if(x==self.posi+2 and (y==self.posj-1 or y==self.posj+1 )):
           return True
         else:
-          print("movimiento no permitido")
+          print(movementFailed)
           return False
       else:
         if(x==self.posi-2 and (y==self.posj-1 or y==self.posj+1 )):
           return True
         else:
-          print("movimiento no permitido")
+          print(movementFailed)
           return False
   
   def crownedMove(self,x,y):
@@ -392,7 +507,7 @@ class horse:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
     else:
       if(x==self.posi-1):
@@ -404,16 +519,21 @@ class horse:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
+  def hasObstacles(self,table,x,y):
+    """devuelve False porque siempre salta de posicion"""
+    return False
     
 
-class bishop:
+class Bishop:
   posi=0
   posj=0
   white=None
   crown=False
   isCorunable=True
+  autoCorunable=False
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -423,12 +543,12 @@ class bishop:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Bv'+'\033[0m'
+        return '*Bv'
       else:
         return '*B^'
     else:
       if(self.white):
-        return '\033[1m'+' Bv'+'\033[0m'
+        return ' Bv'
       else:
         return ' B^'
 
@@ -440,13 +560,13 @@ class bishop:
 
   def isPossible(self,x,y):
     """ revisa si es posible efectuar el movimiento"""
-    act=self.posi*9+self.posj
+    act=(self.posi+1)*9+self.posj
     if(self.crown):
       return self.crownedMove
-    if((x*9+y-act)%10==0 or (x*9+y+act)%8==0):
+    if(((x+1)*9+y)%10==act%10 or ((x+1)*9+y)%8==act%8):
       return True
     else:
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
 
   def crownedMove(self,x,y):
@@ -454,7 +574,33 @@ class bishop:
       return True
     elif ((y==self.posj-1 or y==self.posj+1) and x==self.posi):
       return True
-        
+  
+  def hasObstacles(self,table,x,y):
+    """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
+    if (self.posi<x):
+      if(self.posj<y):
+        for i in range (1,abs(x-self.posi)):
+          if(not table.isFree(self.posi+i,self.posj+i)):
+            print(movementFailed)
+            return True
+      else:
+        for i in range (1,abs(x-self.posi)):
+          if(not table.isFree(self.posi+i,self.posj-i)):
+            print(movementFailed)
+            return True
+    else:
+      if(self.posj<y):
+        for i in range (1,abs(x-self.posi)):
+          if(not table.isFree(self.posi-i,self.posj+i)):
+            print(movementFailed)
+            return True
+      else:
+        for i in range (1,abs(x-self.posi)):
+          if(not table.isFree(self.posi-i,self.posj-i)):
+            print(movementFailed)
+            return True
+    return False
+
   
 class Tower:
   posi=0
@@ -462,6 +608,8 @@ class Tower:
   white=None
   crown=False
   isCorunable=True
+  autoCorunable=False
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -471,12 +619,12 @@ class Tower:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Tv'+'\033[0m'
+        return '*Tv'
       else:
         return '*T^'
     else:
       if(self.white):
-        return '\033[1m'+' Tv'+'\033[0m'
+        return ' Tv'
       else:
         return ' T^'
   
@@ -487,20 +635,45 @@ class Tower:
 
   def isPossible(self,x,y):
     """ revisa si es posible efectuar el movimiento"""
-    act=self.posi*9+self.posj
     if(self.crown):
       return self.crownedMove(x,y)
     
-    if((x*9+y-act)%8==0 or y==self.posj):
+    if((x)%8==self.posi%8 or y==self.posj):
       return True
     else:
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
+    
   
   def crownedMove(self,x,y):
     if((x==self.posi-1 or x==self.posi+1) and (y==self.posj+1 or y==self.posj-1)):
       return True
-
+    if((x)%8==self.posi%8 or y==self.posj):
+      return True
+  
+  def hasObstacles(self,table,x,y):
+    """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
+    if (self.posi<x):
+      for i in range (1,abs(x-self.posi)):
+        if(not table.isFree(self.posi+i,self.posj)):
+          print(movementFailed)
+          return True
+    elif (self.posi>x):
+      for i in range (1,abs(x-self.posi)):
+        if(not table.isFree(self.posi-i,self.posj)):
+          print(movementFailed)
+          return True
+    elif (self.posj<y):
+      for i in range (1,abs(y-self.posj)):
+        if(not table.isFree(self.posi,self.posj+i)):
+          print(movementFailed)
+          return True
+    elif (self.posj>y):
+      for i in range (1,abs(x-self.posi)):
+        if(not table.isFree(self.posi,self.posj-i)):
+          print(movementFailed)
+          return True
+    return False
 
 
 class Lancer:
@@ -509,6 +682,8 @@ class Lancer:
   white=None
   crown=False
   isCorunable=True
+  autoCorunable=True
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -518,12 +693,12 @@ class Lancer:
   def __str__(self):
     if(self.crown):
       if(self.white):
-        return '\033[1m'+'*Lv'+'\033[0m'
+        return '*Lv'
       else:
         return '*L^'
     else:
       if(self.white):
-        return '\033[1m'+' Lv'+'\033[0m'
+        return ' Lv'
       else:
         return ' L^'
   
@@ -541,13 +716,13 @@ class Lancer:
         if(y==self.posj and x>self.posi):
           return True
         else:
-          print("movimiento no permitido")
+          print(movementFailed)
           return False
       else:
-        if(y==self.posj and x<self.posj):
+        if(y==self.posj and x<self.posi):
           return True
         else:
-          print("movimiento no permitido")
+          print(movementFailed)
           return False
   
   def crownedMove(self,x,y):
@@ -562,7 +737,7 @@ class Lancer:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
     else:
       if(x==self.posi-1):
@@ -574,15 +749,32 @@ class Lancer:
       elif(x==self.posi):
         if(y==self.posj-1 or y==self.posj+1):
           return True
-      print("movimiento no permitido")
+      print(movementFailed)
       return False
+  
+  def hasObstacles(self,table,x,y):
+    """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
+    if(self.posi<x):
+      for i in range (1,abs(x-self.posi)):
+        if(not table.isFree(self.posi+i,self.posj)):
+          print(movementFailed)
+          return True
+    else:
+      for i in range (1,abs(x-self.posi)):
+        if(not table.isFree(self.posi-i,self.posj)):
+          print(movementFailed)
+          return True
+    return False
+    
     
 class King:
   posi=0
   posj=0
   white=None
-  crown=False
+  crown=True
   isCorunable=False
+  autoCorunable=False
+  canBeCorunated=False
   
   def __init__(self, posi,posj,white):
     self.posi=posi
@@ -591,7 +783,7 @@ class King:
 
   def __str__(self):
     if(self.white):
-      return '\033[1m'+' Kv'+'\033[0m'
+      return ' Kv'
     else:
       return ' K^'
   
@@ -611,6 +803,8 @@ class King:
     elif(x==self.posi):
       if(y==self.posj-1 or y==self.posj+1):
         return True
-    print("movimiento no permitido")
+    print(movementFailed)
     return False
 
+  def hasObstacles(self,table,x,y):
+    return False
