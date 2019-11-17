@@ -17,6 +17,9 @@ invoke feature:
 checkmate feature:
   coming soon
 
+function controlPawns:
+  allows to the game verify if a pawn is in the same col than the pawn to be invoked, if that is true, return False and the process won't be completed, else put the chip on the table
+
 
 
 Note:the players aren't an object like the pieces, they are just a string
@@ -25,8 +28,11 @@ pending changes:
   \\fix the bug with the bishop
   +control when someone wins
   \\incorporate dead pieces to the table (added)
-  +fix -1 index in table 
-  +add control with pawns (there can't be 2 in same col)
+  \\fix -1 index in table 
+  \\add control with pawns (there can't be 2 in same col)
+  \\fix jump in Lancer 
+  +fix the view when an action is cancelled
+  +help for possible moves
 
 pending test:
   \\bishop moves

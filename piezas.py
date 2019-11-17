@@ -178,19 +178,38 @@ class Tablero:
     return att
   
   def insert(self,piece,x,y,player):
-    self.table[x][y]=piece
-    print(piece)
-    if(player=="White"):
-      self.graveyardW.remove(piece)
-      piece.refreshMove(x,y)
-      self.checkAutoCrown(x,y)
+    if(isinstance(piece, Pawn)):
+      print(True)
+      if(not self.controlPawns(piece,x,y,player)):
+        print("invocation error")
+        return False
     else:
-      self.graveyardB.remove(piece)
-      piece.refreshMove(x,y)
-      self.checkAutoCrown(x,y)
-    return True
+      self.table[x][y]=piece
+      print(piece)
+      if(player=="White"):
+        self.graveyardW.remove(piece)
+        piece.refreshMove(x,y)
+        self.checkAutoCrown(x,y)
+      else:
+        self.graveyardB.remove(piece)
+        piece.refreshMove(x,y)
+        self.checkAutoCrown(x,y)
+      return True
     
+  def controlPawns(self,piece,x,y,player):
+    if(player=="White"):
+      for i in range (9):
+        if(self.table[x][i]==" pv" or self.table[x][i]=="*pv"):
+          return False
+      return True
+    else:
+      for i in range (9):
+        if(self.table[x][i]==" p^" or self.table[x][i]=="*p^"):
+          return False
+      return True
   
+  
+
   
   
 class GoldenGen:
@@ -635,22 +654,22 @@ class Tower:
   def hasObstacles(self,table,x,y):
     """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
     if (self.posi<x):
-      for i in range (1,abs(x-self.posi)-1):
+      for i in range (1,abs(x-self.posi)):
         if(not table.isFree(self.posi+i,self.posj)):
           print(movementFailed)
           return True
     elif (self.posi>x):
-      for i in range (1,abs(x-self.posi)-1):
+      for i in range (1,abs(x-self.posi)):
         if(not table.isFree(self.posi-i,self.posj)):
           print(movementFailed)
           return True
     elif (self.posj<y):
-      for i in range (1,abs(y-self.posj)-1):
+      for i in range (1,abs(y-self.posj)):
         if(not table.isFree(self.posi,self.posj+i)):
           print(movementFailed)
           return True
     elif (self.posj>y):
-      for i in range (1,abs(x-self.posi)-1):
+      for i in range (1,abs(x-self.posi)):
         if(not table.isFree(self.posi,self.posj-i)):
           print(movementFailed)
           return True
@@ -736,12 +755,12 @@ class Lancer:
   def hasObstacles(self,table,x,y):
     """revisa si hay otras piezas en el camino devuelve True si hay obstaculos"""
     if(self.posi<x):
-      for i in range (1,abs(x-self.posi)-1):
+      for i in range (1,abs(x-self.posi)):
         if(not table.isFree(self.posi+i,self.posj)):
           print(movementFailed)
           return True
     else:
-      for i in range (1,abs(x-self.posi)-1):
+      for i in range (1,abs(x-self.posi)):
         if(not table.isFree(self.posi-i,self.posj)):
           print(movementFailed)
           return True
