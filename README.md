@@ -25,16 +25,9 @@ function controlPawns:
 Note:the players aren't an object like the pieces, they are just a string
 
 pending changes:
-  \\fix the bug with the bishop
   +control when someone wins
-  \\incorporate dead pieces to the table (added)
-  \\fix -1 index in table 
-  \\add control with pawns (there can't be 2 in same col)
-  \\fix jump in Lancer 
   +fix the view when an action is cancelled
   +help for possible moves
 
 pending test:
-  \\bishop moves
-  \\obstacles
   -invoking
